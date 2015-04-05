@@ -6,24 +6,20 @@
 
 #include <common/Exception.hpp>
 
-namespace System
-{
-	namespace Registry
-	{
-		class RegistryError : public Common::Exception
-		{
+namespace System {
+	namespace Registry {
+		class RegistryError : public Common::Exception {
 			public:
 				RegistryError(const std::string& msg, long code=0);
 		};
 
 		// l'index est constitué du nom de la valeur
 		typedef std::map<std::string, std::string> Values;
-		
+
 		// tableau du nom des sous clés
 		typedef std::vector<std::string> KeyList;
-		
-		enum RegistryType
-		{
+
+		enum RegistryType {
 			TYPE_BINARY,
 			TYPE_DWORD,
 			TYPE_EXPAND_SZ,
@@ -36,9 +32,8 @@ namespace System
 			TYPE_RESOURCE_LIST,
 			TYPE_RESOURCE_REQUIREMENTS_LIST
 		};
-		
-		enum RegistryBase
-		{
+
+		enum RegistryBase {
 			classesRoot=0,
 			currentUser=1,
 			localMachine=2,
@@ -49,20 +44,18 @@ namespace System
 			perfText=64
 		};
 
-		class Value
-		{
+		class Value {
 			public:
 
 			private:
-				
+
 				RegistryType type;
 		};
 
 		// Chaque clé gère les valeurs qu'elle possède
-		class Key
-		{
+		class Key {
 			public:
-				
+
 				Key(const RegistryBase& base, const std::string& path, bool doCreation=false);
 				bool exists();
 				bool create();
@@ -81,7 +74,7 @@ namespace System
 				int valuesCount();
 
 			private:
-				
+
 				std::string path;
 				RegistryBase base;
 		};

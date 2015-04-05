@@ -3,16 +3,14 @@
 #include <string>
 #include <fstream>
 
-namespace System
-{
-	#ifdef WIN32
-	class FileListing
-	{
+namespace System {
+#ifdef WIN32
+	class FileListing {
 		public:
 			std::string getLogicalVolumes();
 			std::string getDirectoryList(const std::string& directory);
 	};
-	#endif
+#endif
 
 	std::string GetFileDir(const std::string& pathname);
 	std::string GetFileName(const std::string& pathname);

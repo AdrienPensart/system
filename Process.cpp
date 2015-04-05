@@ -13,62 +13,52 @@
 #include <common/Exception.hpp>
 using namespace std;
 
-namespace System
-{
-	namespace Process
-	{
-		DWORD This::getPid()
-		{
+namespace System {
+	namespace Process {
+		DWORD This::getPid() {
 			return GetCurrentProcessId();
 		}
 
-		DWORD This::getParentPid()
-		{
+		DWORD This::getParentPid() {
 			return GetParentPid(getPid());
 		}
 
-		ProcessEntry GetParentProcessEntry(DWORD pid)
-		{
+		ProcessEntry GetParentProcessEntry(DWORD pid) {
 			ProcessEntry pe;
 			HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 			PROCESSENTRY32 pe32 = { 0 };
 			pe32.dwSize = sizeof(PROCESSENTRY32);
 
-			if( Process32First(h, &pe32))
-			{
-    			do
-				{
-    				if (pe32.th32ProcessID == pid)
-					{
+			if( Process32First(h, &pe32)) {
+				do {
+					if (pe32.th32ProcessID == pid) {
 						pe.first = pe32.th32ParentProcessID;
 						pe.second = pe32.szExeFile;
-    				}
-    			} while( Process32Next(h, &pe32));
+					}
+				} while( Process32Next(h, &pe32));
 			}
 			CloseHandle(h);
 			return pe;
 		}
 
-		DWORD GetParentPid(DWORD pid)
-		{
+		DWORD GetParentPid(DWORD pid) {
 			DWORD ppid = -1;
 			HANDLE h = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 			PROCESSENTRY32 pe = { 0 };
 			pe.dwSize = sizeof(PROCESSENTRY32);
 
 			if( Process32First(h, &pe)) {
-    			do {
-    				if (pe.th32ProcessID == pid) {
-    					ppid = pe.th32ParentProcessID;
-    				}
-    			} while( Process32Next(h, &pe));
+				do {
+					if (pe.th32ProcessID == pid) {
+						ppid = pe.th32ParentProcessID;
+					}
+				} while( Process32Next(h, &pe));
 			}
 			CloseHandle(h);
 			return ppid;
 		}
 
-		std::string This::getPath()
-		{
+		std::string This::getPath() {
 			HMODULE hModule = GetModuleHandle(NULL);
 			CHAR path[MAX_PATH];
 			GetModuleFileName(hModule, path, MAX_PATH);
@@ -76,19 +66,16 @@ namespace System
 		}
 
 		This::This()
-			:argc(0), argvw(0), argv(0)
-		{
+			:argc(0), argvw(0), argv(0) {
 			// récuperation des arguments au programme
 			argvw = CommandLineToArgvW(GetCommandLineW(), &argc);
-			if(argvw == NULL)
-			{
+			if(argvw == NULL) {
 				throw Common::Exception("CommandLineToArgvW failed : " + GetLastError());
 			}
 
 			// Conversion en chaine multi-octets
 			argv = new char * [argc];
-			for(int index = 0; index < argc; index++)
-			{
+			for(int index = 0; index < argc; index++) {
 				size_t stringSize = wcslen(argvw[index]);
 				argv[index] = new char [stringSize+1];
 				wcstombs(argv[index], argvw[index], stringSize+1);
@@ -101,18 +88,15 @@ namespace System
 			programDir = GetFileDir(programDir);
 		}
 
-		This::~This()
-		{
+		This::~This() {
 			LocalFree(argvw);
-			for(int index = 0; index < argc; index++)
-			{
+			for(int index = 0; index < argc; index++) {
 				delete argv[index];
 			}
 			delete argv;
 		}
 
-		void This::killHierarchy()
-		{
+		void This::killHierarchy() {
 			LOG << "Killing current process hierarchy";
 			ProcessEntry pe;
 			DWORD nextPid = getPid();
@@ -122,31 +106,26 @@ namespace System
 			std::list<DWORD> processChain;
 
 			// aggregate process tree
-			while(true)
-			{
+			while(true) {
 				processChain.push_back(nextPid);
 				pe = GetParentProcessEntry(nextPid);
 				std::transform(pe.second.begin(), pe.second.end(), pe.second.begin(), ::tolower);
 				//LOG << "Comparing " + pe.second + "(" + Common::toString(pe.first) + ") and " + programName + "(" + Common::toString(nextPid) + ")";
-				if(pe.second != programName)
-				{
+				if(pe.second != programName) {
 					break;
 				}
 				nextPid = pe.first;
 			}
 
 			// killing all processes in reverse order
-			for(std::list<DWORD>::reverse_iterator i = processChain.rbegin(); i != processChain.rend(); i++)
-			{
+			for(std::list<DWORD>::reverse_iterator i = processChain.rbegin(); i != processChain.rend(); i++) {
 				LOG << "Killing process with pid " + Common::toString(*i);
 				System::Process::KillProcess(*i);
 			}
 		}
 
-		bool This::runAsAdmin()
-		{
-			if(!isAdministrator())
-			{
+		bool This::runAsAdmin() {
+			if(!isAdministrator()) {
 				LOG << "Try to run as administrator " + programPath + " as admin";
 				RunAsAdministrator(programName, programDir, true);
 				return false;
@@ -154,38 +133,31 @@ namespace System
 			return true;
 		}
 
-		const std::string& This::getProgramPath()
-		{
+		const std::string& This::getProgramPath() {
 			return programPath;
 		}
 
-		const std::string& This::getProgramName()
-		{
+		const std::string& This::getProgramName() {
 			return programName;
 		}
 
-		const std::string& This::getProgramDir()
-		{
+		const std::string& This::getProgramDir() {
 			return programDir;
 		}
 
-		int& This::getArgCount()
-		{
+		int& This::getArgCount() {
 			return argc;
 		}
 
-		const std::string This::getArg(unsigned int index)
-		{
+		const std::string This::getArg(unsigned int index) {
 			return argv[index];
 		}
 
-		char ** This::getArgs()
-		{
+		char ** This::getArgs() {
 			return argv;
 		}
 
-		Launcher::Launcher(const std::string& executable, const std::string& args, bool show)
-		{
+		Launcher::Launcher(const std::string& executable, const std::string& args, bool show) {
 			PROCESS_INFORMATION pInfo;
 			STARTUPINFOA sInfo;
 			sInfo.cb = sizeof(STARTUPINFOA);
@@ -199,7 +171,7 @@ namespace System
 			sInfo.dwY = 0;
 			sInfo.dwFillAttribute = 0;
 			sInfo.wShowWindow = SW_HIDE;
- 
+
 			memset (&sInfo, 0, sizeof(sInfo));
 			sInfo.cb = sizeof(sInfo);
 
@@ -227,125 +199,96 @@ namespace System
 			createProcessResult = ShellExecuteEx(&ExecuteInfo);
 			*/
 
-			if(!createProcessResult)
-			{
+			if(!createProcessResult) {
 				running = false;
 				throw Common::Exception("Creating the process " + executable + " failed : " + Common::toString(GetLastError()));
-			}
-			else
-			{
+			} else {
 				running = true;
 				pid = pInfo.dwProcessId;
 				process = pInfo.hProcess;
 			}
 		}
 
-		DWORD Launcher::getPid()
-		{
+		DWORD Launcher::getPid() {
 			//return GetProcessId(ExecuteInfo.hProcess);
 			return pid;
 		}
 
-		DWORD Launcher::wait()
-		{
+		DWORD Launcher::wait() {
 			DWORD exitCode = EXIT_FAILURE;
-			if(isRunning())
-			{
+			if(isRunning()) {
 				WaitForSingleObject(process,INFINITE);
 				GetExitCodeProcess(process, &exitCode);
 			}
 			return exitCode;
 		}
 
-		void Launcher::kill()
-		{
+		void Launcher::kill() {
 			KillProcess(getPid());
 		}
 
-		bool Launcher::isRunning()
-		{
+		bool Launcher::isRunning() {
 			return running;
 		}
 
-		bool Launcher::SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege)
-		{
+		bool Launcher::SetPrivilege(HANDLE hToken, LPCTSTR lpszPrivilege, BOOL bEnablePrivilege) {
 			TOKEN_PRIVILEGES tp;
 			LUID luid;
 
-			if ( !LookupPrivilegeValue(NULL, lpszPrivilege, &luid) )
-			{
+			if ( !LookupPrivilegeValue(NULL, lpszPrivilege, &luid) ) {
 				LOG << "LookupPrivilegeValue failed : " + Common::toString(GetLastError());
 				return false;
 			}
 
 			tp.PrivilegeCount = 1;
 			tp.Privileges[0].Luid = luid;
-			if (bEnablePrivilege)
-			{
+			if (bEnablePrivilege) {
 				tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-			}
-			else
-			{
+			} else {
 				tp.Privileges[0].Attributes = 0;
 			}
 
-			if ( !AdjustTokenPrivileges(hToken,FALSE,&tp,sizeof(TOKEN_PRIVILEGES),(PTOKEN_PRIVILEGES) NULL,(PDWORD) NULL) )
-			{
+			if ( !AdjustTokenPrivileges(hToken,FALSE,&tp,sizeof(TOKEN_PRIVILEGES),(PTOKEN_PRIVILEGES) NULL,(PDWORD) NULL) ) {
 				LOG << "AdjustTokenPrivileges failed : " + Common::toString(GetLastError());
 				return false;
 			}
-			if (GetLastError() == ERROR_NOT_ALL_ASSIGNED)
-			{
+			if (GetLastError() == ERROR_NOT_ALL_ASSIGNED) {
 				LOG << "The token does not have the specified privilege";
 				return false;
 			}
 			return true;
 		}
 
-		bool GetProcessList(Process::Map& mapProcs)
-		{
+		bool GetProcessList(Process::Map& mapProcs) {
 			bool bResult = false;
 			mapProcs.clear();
 
 			HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-			if (hSnapshot == INVALID_HANDLE_VALUE)
-			{
+			if (hSnapshot == INVALID_HANDLE_VALUE) {
 				LOG << "CreateToolhelp32Snapshot failed : " + Common::toString(GetLastError());
-			}
-			else
-			{
+			} else {
 				bool bFirst = true;
 				PROCESSENTRY32 pe;
-				while(true)
-				{
+				while(true) {
 					ZeroMemory(&pe, sizeof(pe));
 					pe.dwSize = sizeof(pe);
 
 					BOOL bPR = FALSE;
-					if (bFirst)
-					{
+					if (bFirst) {
 						bFirst = false;
 						bPR = Process32First(hSnapshot, &pe);
-					}
-					else
-					{
+					} else {
 						bPR = Process32Next(hSnapshot, &pe);
 					}
 
-					if (!bPR)
-					{
+					if (!bPR) {
 						DWORD dwErr = GetLastError();
 
-						if (ERROR_NO_MORE_FILES != dwErr)
-						{
+						if (ERROR_NO_MORE_FILES != dwErr) {
 							LOG << "Process32Next/First failed";
-						}
-						else if (mapProcs.empty())
-						{
+						} else if (mapProcs.empty()) {
 							LOG << "Process32Next/First returned nothing";
-						}
-						else
-						{
+						} else {
 							bResult = true;
 						}
 						break;
@@ -354,13 +297,12 @@ namespace System
 					// on ajoute à la liste uniquement les processus dont on peut obtenir les
 					// droits dessus
 					HANDLE hProc = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pe.th32ProcessID);
-					if (hProc != 0)
-					{
+					if (hProc != 0) {
 						CloseHandle(hProc);
 						mapProcs.insert( std::make_pair( pe.th32ProcessID, pe.szExeFile ) );
 					}
 				}
-	
+
 				CloseHandle(hSnapshot);
 			}
 			return bResult;
@@ -372,55 +314,44 @@ namespace System
 		BOOL CALLBACK EnumProcessCallback(DWORD dwProcessId, LPCTSTR pszProcessName, PDWORD pdwPID, LPCTSTR pszName);
 		BOOL SetDebugPrivileges(VOID);
 
-		DWORD GetPidFromName(const std::string& name)
-		{
+		DWORD GetPidFromName(const std::string& name) {
 			DWORD dwPID = 0;
 			_EnumProcesses(GetPIDFromNameCallback, name.c_str(), &dwPID);
 			return dwPID;
 		}
 
 		std::string processes;
-		std::string GetAllRunningProcess()
-		{
+		std::string GetAllRunningProcess() {
 			_EnumProcesses(EnumProcessCallback, 0, 0);
 			std::string current_proc_list = processes;
 			processes.erase(processes.begin(), processes.end());
 			return current_proc_list;
 		}
 
-		bool KillProcess(const std::string& name)
-		{
+		bool KillProcess(const std::string& name) {
 			return KillProcess(GetPidFromName(name));
 		}
 
-		bool KillProcess(DWORD pid)
-		{
+		bool KillProcess(DWORD pid) {
 			HANDLE hProcess;
-			if ((hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid)) != 0)
-			{
-				if (TerminateProcess(hProcess, 0) != 0)
-				{
+			if ((hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pid)) != 0) {
+				if (TerminateProcess(hProcess, 0) != 0) {
 					CloseHandle(hProcess);
 					return true;
-				}
-				else
-				{
+				} else {
 					LOG << "KillProcess (TerminateProcess) failed : " + Common::toString(GetLastError());
 				}
-			}
-			else
-			{
+			} else {
 				LOG << "KillProcess (OpenProcess) failed : " + Common::toString(GetLastError());
 			}
 			return false;
 		}
 
-		#ifndef offsetof
-		#   define offsetof(a, b)   ((size_t)&(((a *)0)->b))
-		#endif
+#ifndef offsetof
+#   define offsetof(a, b)   ((size_t)&(((a *)0)->b))
+#endif
 
-		BOOL WINAPI EnumProcessesToolHelp(PFNENUMPROC pfnEnumProc, LPCTSTR pszName, PDWORD pdwPID)
-		{
+		BOOL WINAPI EnumProcessesToolHelp(PFNENUMPROC pfnEnumProc, LPCTSTR pszName, PDWORD pdwPID) {
 			typedef HANDLE (WINAPI *CREATESNAPSHOT) (DWORD, DWORD);
 			typedef BOOL   (WINAPI *PROCESSWALK)    (HANDLE, LPPROCESSENTRY32);
 
@@ -449,17 +380,16 @@ namespace System
 			// Otherwise it will fail on some versions of Windows NT
 			// which doesn't have Toolhelp functions defined in Kernel32.
 			CreateToolhelp32Snapshot = (CREATESNAPSHOT) GetProcAddress(hKernel, "CreateToolhelp32Snapshot");
-		#ifdef UNICODE
+#ifdef UNICODE
 			Process32First = (PROCESSWALK) GetProcAddress(hKernel, "Process32FirstW");
 			Process32Next = (PROCESSWALK) GetProcAddress(hKernel, "Process32NextW");
-		#else
+#else
 			Process32First = (PROCESSWALK) GetProcAddress(hKernel, "Process32First");
 			Process32Next = (PROCESSWALK) GetProcAddress(hKernel, "Process32Next");
-		#endif
+#endif
 
 			// Error
-			if (!CreateToolhelp32Snapshot || !Process32First || !Process32Next)
-			{
+			if (!CreateToolhelp32Snapshot || !Process32First || !Process32Next) {
 				SetLastError(ERROR_PROC_NOT_FOUND);
 				return FALSE;
 			}
@@ -471,17 +401,14 @@ namespace System
 
 			// First process
 			pe32.dwSize = sizeof(pe32);
-			if (!Process32First(hSnapshot, &pe32))
-			{
+			if (!Process32First(hSnapshot, &pe32)) {
 				CloseHandle(hSnapshot);
 				return FALSE;
 			}
 
 			// Walk through all processes
-			do
-			{
-				if (pe32.dwSize > offsetof(PROCESSENTRY32, szExeFile))
-				{
+			do {
+				if (pe32.dwSize > offsetof(PROCESSENTRY32, szExeFile)) {
 					// Get process name (without path)
 					pszProcessName = _tcsrchr(pe32.szExeFile, TEXT('\\'));
 					if (pszProcessName)
@@ -489,9 +416,7 @@ namespace System
 					else
 						pszProcessName = pe32.szExeFile;
 					dwPID = pe32.th32ProcessID;
-				}
-				else
-				{
+				} else {
 					pszProcessName = NULL;
 					dwPID = 0;
 				}
@@ -509,30 +434,26 @@ namespace System
 			return TRUE;
 		}
 
-		BOOL WINAPI EnumProcessesNtQuerySystemInformation(PFNENUMPROC pfnEnumProc, LPCTSTR pszName, PDWORD pdwPID)
-		{
+		BOOL WINAPI EnumProcessesNtQuerySystemInformation(PFNENUMPROC pfnEnumProc, LPCTSTR pszName, PDWORD pdwPID) {
 			typedef LONG    NTSTATUS;
 			typedef LONG    KPRIORITY;
 
-			#define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
-			#define STATUS_INFO_LENGTH_MISMATCH    ((NTSTATUS)0xC0000004L)
-			#define SystemProcessesAndThreadsInformation    5
+#define NT_SUCCESS(Status) ((NTSTATUS)(Status) >= 0)
+#define STATUS_INFO_LENGTH_MISMATCH    ((NTSTATUS)0xC0000004L)
+#define SystemProcessesAndThreadsInformation    5
 
-			typedef struct _CLIENT_ID
-			{
+			typedef struct _CLIENT_ID {
 				DWORD       UniqueProcess;
 				DWORD       UniqueThread;
 			} CLIENT_ID;
 
-			typedef struct UNICODE_STRING
-			{
+			typedef struct UNICODE_STRING {
 				USHORT      Length;
 				USHORT      MaximumLength;
 				PWSTR       Buffer;
 			} UNICODE_STRING;
 
-			typedef struct _VM_COUNTERS 
-			{
+			typedef struct _VM_COUNTERS {
 				SIZE_T      PeakVirtualSize;
 				SIZE_T      VirtualSize;
 				ULONG       PageFaultCount;
@@ -546,8 +467,7 @@ namespace System
 				SIZE_T      PeakPagefileUsage;
 			} VM_COUNTERS;
 
-			typedef struct _SYSTEM_THREADS 
-			{
+			typedef struct _SYSTEM_THREADS {
 				LARGE_INTEGER   KernelTime;
 				LARGE_INTEGER   UserTime;
 				LARGE_INTEGER   CreateTime;
@@ -562,8 +482,7 @@ namespace System
 			} SYSTEM_THREADS, * PSYSTEM_THREADS;
 
 			// NOTE: SYSTEM_PROCESSES structure is different on NT 4 and Win2K
-			typedef struct _SYSTEM_PROCESSES 
-			{
+			typedef struct _SYSTEM_PROCESSES {
 				ULONG           NextEntryDelta;
 				ULONG           ThreadCount;
 				ULONG           Reserved1[6];
@@ -577,9 +496,9 @@ namespace System
 				ULONG           HandleCount;
 				ULONG           Reserved2[2];
 				VM_COUNTERS     VmCounters;
-			#if _WIN32_WINNT >= 0x500
+#if _WIN32_WINNT >= 0x500
 				IO_COUNTERS     IoCounters;
-			#endif
+#endif
 				SYSTEM_THREADS  Threads[1];
 			} SYSTEM_PROCESSES, * PSYSTEM_PROCESSES;
 
@@ -594,60 +513,49 @@ namespace System
 			LPVOID                      pBuffer = NULL;
 			LONG                        Status;
 
-		#ifndef UNICODE
+#ifndef UNICODE
 			CHAR                        szProcessName[MAX_PATH];
-		#endif
+#endif
 
-			if (!pfnEnumProc)
-			{
+			if (!pfnEnumProc) {
 				return FALSE;
 			}
 
-			if (pdwPID)
-			{
+			if (pdwPID) {
 				*pdwPID = 0;
 			}
 
-			if (!(hNTDll = LoadLibrary(TEXT("NTDLL.DLL"))))
-			{
+			if (!(hNTDll = LoadLibrary(TEXT("NTDLL.DLL")))) {
 				return FALSE;
 			}
 
-			if (!(NtQuerySystemInformation = (NTQUERYSYSTEMINFORMATION)GetProcAddress(hNTDll, "NtQuerySystemInformation")))
-			{
+			if (!(NtQuerySystemInformation = (NTQUERYSYSTEMINFORMATION)GetProcAddress(hNTDll, "NtQuerySystemInformation"))) {
 				FreeLibrary(hNTDll);
 				SetLastError(ERROR_PROC_NOT_FOUND);
 				return FALSE;
 			}
-			do
-			{
-				if (!(pBuffer = malloc(BufferLen)))
-				{
+			do {
+				if (!(pBuffer = malloc(BufferLen))) {
 					FreeLibrary(hNTDll);
 					SetLastError(ERROR_NOT_ENOUGH_MEMORY);
 					return FALSE;
 				}
 
 				Status = NtQuerySystemInformation(SystemProcessesAndThreadsInformation,
-												  pBuffer, BufferLen, NULL);
+				                                  pBuffer, BufferLen, NULL);
 
-				if (Status == STATUS_INFO_LENGTH_MISMATCH)
-				{
+				if (Status == STATUS_INFO_LENGTH_MISMATCH) {
 					free(pBuffer);
 					BufferLen *= 2;
-				}
-				else if (!NT_SUCCESS(Status))
-				{
+				} else if (!NT_SUCCESS(Status)) {
 					free(pBuffer);
 					FreeLibrary(hNTDll);
 					return FALSE;
 				}
-			}
-			while (Status == STATUS_INFO_LENGTH_MISMATCH);
+			} while (Status == STATUS_INFO_LENGTH_MISMATCH);
 
 			pInfo = (PSYSTEM_PROCESSES)pBuffer;
-			for (;;)
-			{
+			for (;;) {
 				pszProcessName = pInfo->ProcessName.Buffer;
 				if (pszProcessName == NULL)
 					pszProcessName = L"Idle";
@@ -655,21 +563,18 @@ namespace System
 
 				// Appel de la fonction de callback
 
-		#ifdef UNICODE
-				if (!pfnEnumProc(dwPID, (LPCTSTR)pszProcessName, pdwPID, pszName))
-				{
+#ifdef UNICODE
+				if (!pfnEnumProc(dwPID, (LPCTSTR)pszProcessName, pdwPID, pszName)) {
 					break;
 				}
-		#else
+#else
 				WideCharToMultiByte(CP_ACP, 0, pszProcessName, -1, szProcessName, MAX_PATH, NULL, NULL);
-				if (!pfnEnumProc(dwPID, (LPCTSTR)szProcessName, pdwPID, pszName))
-				{
+				if (!pfnEnumProc(dwPID, (LPCTSTR)szProcessName, pdwPID, pszName)) {
 					break;
 				}
-		#endif
+#endif
 
-				if (pInfo->NextEntryDelta == 0)
-				{
+				if (pInfo->NextEntryDelta == 0) {
 					break;
 				}
 				pInfo = (PSYSTEM_PROCESSES)(((PUCHAR)pInfo) + pInfo->NextEntryDelta);
@@ -680,8 +585,7 @@ namespace System
 			return TRUE;
 		}
 
-		BOOL _EnumProcesses(PFNENUMPROC pfnEnumProc, LPCTSTR pszName, PDWORD pdwPID)
-		{
+		BOOL _EnumProcesses(PFNENUMPROC pfnEnumProc, LPCTSTR pszName, PDWORD pdwPID) {
 			OSVERSIONINFO   info;
 			info.dwOSVersionInfoSize = sizeof(info);
 			GetVersionEx(&info);
@@ -695,8 +599,7 @@ namespace System
 				return FALSE;
 		}
 
-		BOOL SetDebugPrivileges(VOID)
-		{
+		BOOL SetDebugPrivileges(VOID) {
 			DWORD dwPID;
 			HANDLE hProcess;
 			HANDLE hToken;
@@ -721,24 +624,20 @@ namespace System
 			return TRUE;
 		}
 
-		BOOL CALLBACK EnumProcessCallback(DWORD dwProcessId, LPCTSTR pszProcessName, PDWORD pdwPID, LPCTSTR pszName)
-		{
+		BOOL CALLBACK EnumProcessCallback(DWORD dwProcessId, LPCTSTR pszProcessName, PDWORD pdwPID, LPCTSTR pszName) {
 			processes += (char *)pszProcessName;
 			processes += '\n';
 			return true;
 		}
 
-		BOOL CALLBACK GetPIDFromNameCallback(DWORD dwProcessId, LPCTSTR pszProcessName, PDWORD pdwPID, LPCTSTR pszNameToFind)
-		{
-			if (_tcsicmp(pszProcessName, pszNameToFind) == 0)
-			{
+		BOOL CALLBACK GetPIDFromNameCallback(DWORD dwProcessId, LPCTSTR pszProcessName, PDWORD pdwPID, LPCTSTR pszNameToFind) {
+			if (_tcsicmp(pszProcessName, pszNameToFind) == 0) {
 				// on a trouvé le processus
 				*pdwPID = dwProcessId;
 				return FALSE;
-			}
-			else
-			// on continue l'énumération
-			return TRUE;
+			} else
+				// on continue l'énumération
+				return TRUE;
 		}
 	} // Process
 } // System

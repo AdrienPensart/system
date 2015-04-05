@@ -4,10 +4,8 @@
 #include <string>
 #include <common/WindowsWrapper.hpp>
 
-namespace System
-{
-	namespace Process
-	{
+namespace System {
+	namespace Process {
 		typedef std::map<DWORD, std::string> Map;
 		typedef std::pair<DWORD, std::string> ProcessEntry;
 
@@ -19,8 +17,7 @@ namespace System
 		bool KillProcess(DWORD pid);
 		bool GetProcessList(Process::Map& mapProcs);
 
-		class Launcher
-		{
+		class Launcher {
 			public:
 
 				Launcher(const std::string& executable, const std::string& args="", bool show=false);
@@ -38,8 +35,7 @@ namespace System
 				bool running;
 		};
 
-		class This
-		{
+		class This {
 			public:
 
 				This();

@@ -10,159 +10,142 @@
 #pragma comment(lib, "User32.lib")
 #define BUFSIZE 256
 
-namespace System
-{
-	std::string getComputerName()
-	{
+namespace System {
+	std::string getComputerName() {
 		DWORD size = MAX_COMPUTERNAME_LENGTH;
 		char computerName [MAX_COMPUTERNAME_LENGTH];
-		if(GetComputerName(computerName, &size))
-		{
+		if(GetComputerName(computerName, &size)) {
 			return std::string(computerName, size);
 		}
 		return "";
 	}
 
-	std::string getCompleteComputerName()
-	{
+	std::string getCompleteComputerName() {
 		DWORD size = MAX_COMPUTERNAME_LENGTH;
 		char computerName [MAX_COMPUTERNAME_LENGTH];
-		if(GetComputerNameEx(ComputerNameDnsFullyQualified, computerName, &size))
-		{
+		if(GetComputerNameEx(ComputerNameDnsFullyQualified, computerName, &size)) {
 			return std::string(computerName, size);
 		}
 		return "";
 	}
 
-	std::string getWindowsPath()
-	{
+	std::string getWindowsPath() {
 		char winpath [MAX_PATH];
-        unsigned int size_returned = 0;        
-        if(size_returned = GetWindowsDirectory(winpath, MAX_PATH))
-		{
+		unsigned int size_returned = 0;
+		if(size_returned = GetWindowsDirectory(winpath, MAX_PATH)) {
 			return std::string(winpath, size_returned);
 		}
 		return "";
 	}
 
-    void Token()
-    {
-        HANDLE hToken;
-        TOKEN_PRIVILEGES tkp;
-        OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
-        LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME,&tkp.Privileges[0].Luid);
-        tkp.PrivilegeCount = 1;
-        tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-        AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,(PTOKEN_PRIVILEGES)NULL, 0);
-    }
-
-    SystemVersion getSystemVersion()
-    {
-        OSVERSIONINFOEX osvi;
-        BOOL bOsVersionInfoEx;
-        ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
-        osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-        if(!(bOsVersionInfoEx=GetVersionEx((OSVERSIONINFO *)&osvi)))
-        {
-            osvi.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
-            if (!GetVersionEx((OSVERSIONINFO *)&osvi) )
-                return OS_ERROR;
-        }
-        
-        if(osvi.dwMajorVersion==3 && osvi.dwMinorVersion==51)
-            return OS_WIN32_WINDOWS_NT_3_51;
-        if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
-            return OS_WIN32_WINDOWS_NT_4_0;
-        if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_WINDOWS)
-            return OS_WIN32_WINDOWS_95;
-        if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==10 && osvi.dwPlatformId==VER_PLATFORM_WIN32_WINDOWS)
-            return OS_WIN32_WINDOWS_98;
-        if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==90 && osvi.dwPlatformId==VER_PLATFORM_WIN32_WINDOWS)
-            return OS_WIN32_WINDOWS_Me;
-        if(osvi.dwMajorVersion==5 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
-            return OS_WIN32_WINDOWS_2000;
-        if(osvi.dwMajorVersion==5 && osvi.dwMinorVersion==1 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
-            return OS_WIN32_WINDOWS_XP;
-        if(osvi.dwMajorVersion==5 && osvi.dwMinorVersion==2 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
-            return OS_WIN32_WINDOWS_SERVER_2003_FAMILY;
-        if(osvi.dwMajorVersion==6 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
-            return OS_WIN32_WINDOWS_VISTA;
-		if(VER_PLATFORM_WIN32_NT == osvi.dwPlatformId && osvi.dwMinorVersion == 1 && osvi.wProductType == VER_NT_WORKSTATION)
-			return OS_WIN32_WINDOWS_SEVEN;
-        return OS_UNKNOW;
-    }
-
-    std::string getSystemVersionString()
-    {
-        switch(getSystemVersion())
-        {
-            case OS_ERROR:
-                return "Error SystemVersion";
-            case OS_WIN32_WINDOWS_NT_3_51:
-                return "Windows NT 3.51";
-            case OS_WIN32_WINDOWS_NT_4_0:
-                return "Windows NT 3.51";
-            case OS_WIN32_WINDOWS_95:
-                return "Windows 95";
-            case OS_WIN32_WINDOWS_98:
-                return "Windows 98";
-            case OS_WIN32_WINDOWS_Me:
-                return "Windows Me";
-            case OS_WIN32_WINDOWS_2000:
-                return "Windows 2000";
-            case OS_WIN32_WINDOWS_XP:
-                return "Windows Xp";
-            case OS_WIN32_WINDOWS_SERVER_2003_FAMILY:
-                return "Windows Server 2003 Family";
-            case OS_WIN32_WINDOWS_VISTA:
-                return "Windows Vista All Versions";
-			case OS_WIN32_WINDOWS_SEVEN:
-				return "Windows Seven All Versions";
-            case OS_UNKNOW:
-                return "Unknow system";
-            default:
-                break;
-        }
-        return "Unable to determine SystemVersion";
-    }
-
-	bool is64BitWindows()
-	{
-		#if defined(_WIN64)
-			return TRUE;  // 64-bit programs run only on Win64
-		#elif defined(_WIN32)
-			// 32-bit programs run on both 32-bit and 64-bit Windows
-			// so must sniff
-			BOOL f64 = FALSE;
-			return IsWow64Process(GetCurrentProcess(), &f64) && f64;
-		#else
-			return FALSE; // Win64 does not support Win16
-		#endif
+	void Token() {
+		HANDLE hToken;
+		TOKEN_PRIVILEGES tkp;
+		OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken);
+		LookupPrivilegeValue(NULL, SE_SHUTDOWN_NAME,&tkp.Privileges[0].Luid);
+		tkp.PrivilegeCount = 1;
+		tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+		AdjustTokenPrivileges(hToken, FALSE, &tkp, 0,(PTOKEN_PRIVILEGES)NULL, 0);
 	}
 
-    bool shutdown()
-    {
-        Token();
-        return ExitWindowsEx(EWX_SHUTDOWN | EWX_FORCE, 0) != 0; 
-    }
+	SystemVersion getSystemVersion() {
+		OSVERSIONINFOEX osvi;
+		BOOL bOsVersionInfoEx;
+		ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
+		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+		if(!(bOsVersionInfoEx=GetVersionEx((OSVERSIONINFO *)&osvi))) {
+			osvi.dwOSVersionInfoSize=sizeof(OSVERSIONINFO);
+			if (!GetVersionEx((OSVERSIONINFO *)&osvi) )
+				return OS_ERROR;
+		}
 
-    bool reboot()
-    {
-        Token();
-        return ExitWindowsEx(EWX_REBOOT | EWX_FORCE, 0) != 0;
-    }
+		if(osvi.dwMajorVersion==3 && osvi.dwMinorVersion==51)
+			return OS_WIN32_WINDOWS_NT_3_51;
+		if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
+			return OS_WIN32_WINDOWS_NT_4_0;
+		if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_WINDOWS)
+			return OS_WIN32_WINDOWS_95;
+		if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==10 && osvi.dwPlatformId==VER_PLATFORM_WIN32_WINDOWS)
+			return OS_WIN32_WINDOWS_98;
+		if(osvi.dwMajorVersion==4 && osvi.dwMinorVersion==90 && osvi.dwPlatformId==VER_PLATFORM_WIN32_WINDOWS)
+			return OS_WIN32_WINDOWS_Me;
+		if(osvi.dwMajorVersion==5 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
+			return OS_WIN32_WINDOWS_2000;
+		if(osvi.dwMajorVersion==5 && osvi.dwMinorVersion==1 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
+			return OS_WIN32_WINDOWS_XP;
+		if(osvi.dwMajorVersion==5 && osvi.dwMinorVersion==2 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
+			return OS_WIN32_WINDOWS_SERVER_2003_FAMILY;
+		if(osvi.dwMajorVersion==6 && osvi.dwMinorVersion==0 && osvi.dwPlatformId==VER_PLATFORM_WIN32_NT)
+			return OS_WIN32_WINDOWS_VISTA;
+		if(VER_PLATFORM_WIN32_NT == osvi.dwPlatformId && osvi.dwMinorVersion == 1 && osvi.wProductType == VER_NT_WORKSTATION)
+			return OS_WIN32_WINDOWS_SEVEN;
+		return OS_UNKNOW;
+	}
 
-    bool logout()
-    {
-        Token();
-        return ExitWindowsEx(EWX_LOGOFF | EWX_FORCE, 0) != 0; 
-    }
+	std::string getSystemVersionString() {
+		switch(getSystemVersion()) {
+		case OS_ERROR:
+			return "Error SystemVersion";
+		case OS_WIN32_WINDOWS_NT_3_51:
+			return "Windows NT 3.51";
+		case OS_WIN32_WINDOWS_NT_4_0:
+			return "Windows NT 3.51";
+		case OS_WIN32_WINDOWS_95:
+			return "Windows 95";
+		case OS_WIN32_WINDOWS_98:
+			return "Windows 98";
+		case OS_WIN32_WINDOWS_Me:
+			return "Windows Me";
+		case OS_WIN32_WINDOWS_2000:
+			return "Windows 2000";
+		case OS_WIN32_WINDOWS_XP:
+			return "Windows Xp";
+		case OS_WIN32_WINDOWS_SERVER_2003_FAMILY:
+			return "Windows Server 2003 Family";
+		case OS_WIN32_WINDOWS_VISTA:
+			return "Windows Vista All Versions";
+		case OS_WIN32_WINDOWS_SEVEN:
+			return "Windows Seven All Versions";
+		case OS_UNKNOW:
+			return "Unknow system";
+		default:
+			break;
+		}
+		return "Unable to determine SystemVersion";
+	}
 
-    bool hibernate()
-    {
-        Token();
-        return SetSystemPowerState(TRUE, TRUE) != 0;
-    }
+	bool is64BitWindows() {
+#if defined(_WIN64)
+		return TRUE;  // 64-bit programs run only on Win64
+#elif defined(_WIN32)
+		// 32-bit programs run on both 32-bit and 64-bit Windows
+		// so must sniff
+		BOOL f64 = FALSE;
+		return IsWow64Process(GetCurrentProcess(), &f64) && f64;
+#else
+		return FALSE; // Win64 does not support Win16
+#endif
+	}
+
+	bool shutdown() {
+		Token();
+		return ExitWindowsEx(EWX_SHUTDOWN | EWX_FORCE, 0) != 0;
+	}
+
+	bool reboot() {
+		Token();
+		return ExitWindowsEx(EWX_REBOOT | EWX_FORCE, 0) != 0;
+	}
+
+	bool logout() {
+		Token();
+		return ExitWindowsEx(EWX_LOGOFF | EWX_FORCE, 0) != 0;
+	}
+
+	bool hibernate() {
+		Token();
+		return SetSystemPowerState(TRUE, TRUE) != 0;
+	}
 
 	typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
 	typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
@@ -208,7 +191,7 @@ namespace System
 					else
 					{
 						systemString += "Windows Server 2008 ";
-					} 
+					}
 				}
 
 				if ( osvi.dwMinorVersion == 1 )
@@ -222,7 +205,7 @@ namespace System
 						systemString += "Windows Server 2008 R2 ";
 					}
 				}
-	         
+
 				pGPI = (PGPI) GetProcAddress(GetModuleHandle(TEXT("kernel32.dll")),"GetProductInfo");
 				pGPI( osvi.dwMajorVersion, osvi.dwMinorVersion, 0, 0, &dwType);
 				switch( dwType )
@@ -375,7 +358,7 @@ namespace System
 				{
 					systemString += "Professional";
 				}
-				else 
+				else
 				{
 					if( osvi.wSuiteMask & VER_SUITE_DATACENTER )
 					{
@@ -415,5 +398,5 @@ namespace System
 		}
 		return systemString;
 	}
-	*/	
+	*/
 } /* System */

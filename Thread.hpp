@@ -5,16 +5,14 @@
 #include <network/Timeout.hpp>
 #include <common/WindowsWrapper.hpp>
 
-namespace System
-{
-	class Thread
-	{
+namespace System {
+	class Thread {
 		public:
 
 			Thread(LPTHREAD_START_ROUTINE routine, LPVOID parameter=0);
 			virtual ~Thread();
 			virtual void start();
-            virtual void stop();
+			virtual void stop();
 			virtual bool join(const Network::Timeout& deadline=Network::Timeout::infinite());
 			bool isRunning();
 
@@ -27,7 +25,7 @@ namespace System
 			LPTHREAD_START_ROUTINE routine;
 			LPVOID parameter;
 			DWORD dwThread;
-            HANDLE hThread;
+			HANDLE hThread;
 			bool running;
 	};
 } // System

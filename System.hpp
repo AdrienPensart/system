@@ -3,10 +3,8 @@
 #include <string>
 #include <common/WindowsWrapper.hpp>
 
-namespace System
-{
-	enum SystemVersion
-	{
+namespace System {
+	enum SystemVersion {
 		OS_ERROR = -1,
 		OS_WIN32_WINDOWS_NT_3_51 = 0,
 		OS_WIN32_WINDOWS_NT_4_0,
