@@ -49,15 +49,15 @@ namespace System {
 			return "GetElevationType failed";
 		}
 		switch(g_tet) {
-		case TokenElevationTypeDefault:
-			return "Default elevation level";
-			break;
-		case TokenElevationTypeFull:
-			return "Elevated Level";
-			break;
-		case TokenElevationTypeLimited:
-			return "Running without elevation";
-			break;
+			case TokenElevationTypeDefault:
+				return "Default elevation level";
+				break;
+			case TokenElevationTypeFull:
+				return "Elevated Level";
+				break;
+			case TokenElevationTypeLimited:
+				return "Running without elevation";
+				break;
 		}
 		return "Unknow elevation level";
 	}

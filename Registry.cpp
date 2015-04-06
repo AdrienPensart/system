@@ -84,25 +84,25 @@ namespace System {
 
 		HKEY translateBase(const RegistryBase& base) {
 			switch(base) {
-			case classesRoot:
-				return HKEY_CLASSES_ROOT;
-			case currentUser:
-				return HKEY_CURRENT_USER;
-			case localMachine:
-				return HKEY_LOCAL_MACHINE;
-			case currentConfig:
-				return HKEY_CURRENT_CONFIG;
-			case users:
-				return HKEY_USERS;
-			case perfData:
-				return HKEY_PERFORMANCE_DATA;
-			case perfNlsText:
-				return HKEY_PERFORMANCE_NLSTEXT;
-			case perfText:
-				return HKEY_PERFORMANCE_TEXT;
-			default:
-				// la base donnée en paramètre ne correspond à aucune base de Microsoft
-				throw RegistryError("Bad registry database");
+				case classesRoot:
+					return HKEY_CLASSES_ROOT;
+				case currentUser:
+					return HKEY_CURRENT_USER;
+				case localMachine:
+					return HKEY_LOCAL_MACHINE;
+				case currentConfig:
+					return HKEY_CURRENT_CONFIG;
+				case users:
+					return HKEY_USERS;
+				case perfData:
+					return HKEY_PERFORMANCE_DATA;
+				case perfNlsText:
+					return HKEY_PERFORMANCE_NLSTEXT;
+				case perfText:
+					return HKEY_PERFORMANCE_TEXT;
+				default:
+					// la base donnée en paramètre ne correspond à aucune base de Microsoft
+					throw RegistryError("Bad registry database");
 			}
 			// n'atteint jamais ce point
 			return HKEY();
@@ -303,26 +303,26 @@ namespace System {
 			RegCloseKey(key);
 			if (result == ERROR_SUCCESS) {
 				switch(dwType) {
-				case REG_BINARY:
-					return TYPE_BINARY;
-				case REG_DWORD:
-					return TYPE_DWORD;
-				case REG_EXPAND_SZ:
-					return TYPE_EXPAND_SZ;
-				case REG_MULTI_SZ:
-					return TYPE_MULTI_SZ;
-				case REG_SZ:
-					return TYPE_SZ;
-				case REG_FULL_RESOURCE_DESCRIPTOR:
-					return TYPE_FULL_RESOURCE_DESCRIPTOR;
-				case REG_LINK:
-					return TYPE_LINK;
-				case REG_QWORD:
-					return TYPE_QWORD;
-				case REG_RESOURCE_LIST:
-					return TYPE_RESOURCE_LIST;
-				case REG_RESOURCE_REQUIREMENTS_LIST:
-					return TYPE_RESOURCE_REQUIREMENTS_LIST;
+					case REG_BINARY:
+						return TYPE_BINARY;
+					case REG_DWORD:
+						return TYPE_DWORD;
+					case REG_EXPAND_SZ:
+						return TYPE_EXPAND_SZ;
+					case REG_MULTI_SZ:
+						return TYPE_MULTI_SZ;
+					case REG_SZ:
+						return TYPE_SZ;
+					case REG_FULL_RESOURCE_DESCRIPTOR:
+						return TYPE_FULL_RESOURCE_DESCRIPTOR;
+					case REG_LINK:
+						return TYPE_LINK;
+					case REG_QWORD:
+						return TYPE_QWORD;
+					case REG_RESOURCE_LIST:
+						return TYPE_RESOURCE_LIST;
+					case REG_RESOURCE_REQUIREMENTS_LIST:
+						return TYPE_RESOURCE_REQUIREMENTS_LIST;
 				}
 			}
 			return TYPE_NONE;

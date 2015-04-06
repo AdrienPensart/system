@@ -84,32 +84,32 @@ namespace System {
 
 	std::string getSystemVersionString() {
 		switch(getSystemVersion()) {
-		case OS_ERROR:
-			return "Error SystemVersion";
-		case OS_WIN32_WINDOWS_NT_3_51:
-			return "Windows NT 3.51";
-		case OS_WIN32_WINDOWS_NT_4_0:
-			return "Windows NT 3.51";
-		case OS_WIN32_WINDOWS_95:
-			return "Windows 95";
-		case OS_WIN32_WINDOWS_98:
-			return "Windows 98";
-		case OS_WIN32_WINDOWS_Me:
-			return "Windows Me";
-		case OS_WIN32_WINDOWS_2000:
-			return "Windows 2000";
-		case OS_WIN32_WINDOWS_XP:
-			return "Windows Xp";
-		case OS_WIN32_WINDOWS_SERVER_2003_FAMILY:
-			return "Windows Server 2003 Family";
-		case OS_WIN32_WINDOWS_VISTA:
-			return "Windows Vista All Versions";
-		case OS_WIN32_WINDOWS_SEVEN:
-			return "Windows Seven All Versions";
-		case OS_UNKNOW:
-			return "Unknow system";
-		default:
-			break;
+			case OS_ERROR:
+				return "Error SystemVersion";
+			case OS_WIN32_WINDOWS_NT_3_51:
+				return "Windows NT 3.51";
+			case OS_WIN32_WINDOWS_NT_4_0:
+				return "Windows NT 3.51";
+			case OS_WIN32_WINDOWS_95:
+				return "Windows 95";
+			case OS_WIN32_WINDOWS_98:
+				return "Windows 98";
+			case OS_WIN32_WINDOWS_Me:
+				return "Windows Me";
+			case OS_WIN32_WINDOWS_2000:
+				return "Windows 2000";
+			case OS_WIN32_WINDOWS_XP:
+				return "Windows Xp";
+			case OS_WIN32_WINDOWS_SERVER_2003_FAMILY:
+				return "Windows Server 2003 Family";
+			case OS_WIN32_WINDOWS_VISTA:
+				return "Windows Vista All Versions";
+			case OS_WIN32_WINDOWS_SEVEN:
+				return "Windows Seven All Versions";
+			case OS_UNKNOW:
+				return "Unknow system";
+			default:
+				break;
 		}
 		return "Unable to determine SystemVersion";
 	}
